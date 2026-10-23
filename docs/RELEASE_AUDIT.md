@@ -24,7 +24,7 @@ The local app and data pipeline are runnable and the automated suite, Ruff check
 | Sensitivity | Run `sensitivity_analysis` on real category summary | Education, Shopping, Weather remain top three; Photography and Social exchange ranks 4/5 under equal-weight and demand-light scenarios. The same score function is used. | Pass | Lower two ranks are not robust to reasonable weight changes. | Sensitivity table and rank-change disclosure retained. |
 | Recommendation derivation | Trace scored DataFrame through `recommendation_details`; inspect output rows and concept mapping | Five output concepts are attached to categories actually selected by the computed rank order. Names/features are category-specific editorial hypotheses; category evidence does not establish a specific product’s unmet need. | Pass with limitation | Concept templates are deliberately curated, not algorithmically discovered product features. | Their content labels hypotheses and provides validation experiments; no success forecast is made. |
 | Automated tests | `.venv/Scripts/python.exe -m pytest -q` | 13 passed, including added compact size unit and malformed numeric cases, plus synthetic pipeline, filtering, score, export, and dashboard interactions. | Pass | No failures. | Added regression coverage for actual source units. |
-| Ruff | `.venv/Scripts/ruff.exe check .`; `.venv/Scripts/ruff.exe format --check .` | All checks passed; 23 Python files formatted. | Pass | None. | None. |
+| Ruff | `.venv/Scripts/ruff.exe check .`; `.venv/Scripts/ruff.exe format --check .` | All checks passed; 24 Python files formatted. | Pass | None. | None. |
 | Streamlit page smoke | `AppTest.from_file('app.py')`; switch `research_page` across all five destinations using the workspace data | Market Overview, Explore Categories, Competition & Gaps, Opportunity Finder, Build Plan rendered with no AppTest exceptions. Synthetic tests separately exercise empty category results/reset, all-category selection, weight change/rank update, and reset. | Pass | Browser-level appearance was not observable in this environment. | No unsafe visual-only CSS changes made. |
 | Streamlit running server | GET `http://127.0.0.1:8501/_stcore/health` and `/` | Health returned HTTP 200 `ok`; app root returned HTTP 200. | Pass | Does not prove visual correctness or every browser interaction. | AppTest complements HTTP smoke. |
 | CSV and Markdown serialization | Unit tests for `export_csv_bytes` and `build_plan_markdown` | CSV bytes begin with expected category header; plan export includes actual selected profile evidence and hypothesis/validation language. | Pass | Browser download click itself not automated. | None. |
@@ -72,7 +72,7 @@ The default normalized weights are demand 0.30, accessibility 0.25, satisfaction
 - `docs/TEST_REPORT.md` — update verification details and corrected size-quality count.
 - `docs/RELEASE_AUDIT.md` — this audit report.
 
-Other modified/untracked files in the Git status are the existing redesign work and were preserved; they are not represented as newly authored by this audit.
+`docs/TEST_REPORT.md` also has an updated working-tree copy with this audit's corrected size/test details, but it was not included in the isolated fix commit because that file already contained substantial uncommitted redesign edits. Other modified/untracked files in the Git status are existing redesign work and were preserved; they are not represented as newly authored by this audit.
 
 ## Commands to reproduce locally (Windows PowerShell)
 
