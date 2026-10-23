@@ -13,3 +13,4 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 .DS_Store
+streamlit.log

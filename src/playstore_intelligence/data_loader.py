@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
+DATASET_ID = "lava18/google-play-store-apps"
+
 APP_COLUMNS = {
     "App",
     "Category",
@@ -58,6 +60,20 @@ def load_app_data(path: Path) -> pd.DataFrame:
     return frame
 
 
+def download_public_dataset() -> Path:
+    """Download the public Kaggle catalog into KaggleHub's cache."""
+    try:
+        import kagglehub
+
+        return Path(kagglehub.dataset_download(DATASET_ID))
+    except Exception as exc:
+        raise RuntimeError(
+            "The public Kaggle Play Store dataset is not available locally and "
+            "KaggleHub could not download it. Check hosted outbound network access, "
+            "or provide the official app catalog CSV through PLAYSTORE_DATA_DIR."
+        ) from exc
+
+
 def find_dataset_dir(local_dir: Path | None = None) -> Path:
     """Use an explicit local folder, otherwise the standard KaggleHub cache."""
     if local_dir:
@@ -81,5 +97,5 @@ def find_dataset_dir(local_dir: Path | None = None) -> Path:
         if list(candidate.rglob("*.csv")):
             return candidate
     raise FileNotFoundError(
-        "Kaggle dataset is not cached. Run `python -m playstore_intelligence.data_loader --download` or set PLAYSTORE_DATA_DIR to a folder containing the CSV."
+        "Kaggle dataset is not cached. Run `python -m playstore_intelligence.pipeline --download` with `PYTHONPATH=src`, or set PLAYSTORE_DATA_DIR to a folder containing the CSV."
     )

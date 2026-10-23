@@ -19,7 +19,11 @@ def category_summary(df: pd.DataFrame) -> pd.DataFrame:
                 "mean_rating",
                 "median_rating",
                 "rating_coverage",
+                "rated_apps",
                 "median_reviews",
+                "high_install_share",
+                "free_share",
+                "estimated_install_hhi",
             ]
         )
     result = (

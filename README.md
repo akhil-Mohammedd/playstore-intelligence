@@ -17,10 +17,12 @@ PowerShell activation may be restricted by the machine's execution policy. Activ
 Download through KaggleHub using your local Kaggle authentication:
 
 ```powershell
-python -c "import kagglehub; print(kagglehub.dataset_download('lava18/google-play-store-apps'))"
+.\.venv\Scripts\python.exe -c "import kagglehub; print(kagglehub.dataset_download('lava18/google-play-store-apps'))"
 ```
 
-Alternatively download the dataset from the official Kaggle page in a browser and put the app catalog CSV (and optionally reviews CSV) under `data/raw/`. Do not commit credentials or raw data. KaggleHub can use the existing local credential setup; follow Kaggle's official API-token instructions if prompted. Never paste a token into chat.
+Alternatively download the dataset from the official Kaggle page in a browser and put the app catalog CSV (and optionally reviews CSV) under `data/raw/`, or set `$env:PLAYSTORE_DATA_DIR = 'D:\path\to\downloaded\folder'` before starting Streamlit. Do not commit credentials or raw data. KaggleHub can use the existing local credential setup; follow Kaggle's official API-token instructions if prompted. Never paste a token into chat.
+
+For a fresh hosted instance, the app first checks `PLAYSTORE_DATA_DIR`, `data/raw/`, and the KaggleHub cache. If none has the app catalog, it attempts to download this public dataset with KaggleHub into its cache; this avoids committing the raw CSV and does not intentionally require a private Kaggle token. Hosted startup therefore depends on outbound network access to Kaggle and can be slower on a cold start. If that download is blocked, the page displays an actionable error and the host must provide the official CSV through `PLAYSTORE_DATA_DIR`. This behavior is locally unit-tested with a mocked downloader; hosted network access is not yet verified.
 
 Run the quality/cleaning pipeline from the repository root (uses the latest KaggleHub cache by default):
 
@@ -29,7 +31,7 @@ $env:PYTHONPATH = 'src'
 .\.venv\Scripts\python.exe -m playstore_intelligence.pipeline
 ```
 
-For a manually downloaded CSV folder, pass `--dataset-dir`; to download through KaggleHub and process in one step, use `python -m playstore_intelligence.pipeline --download`.
+For a manually downloaded CSV folder, pass `--dataset-dir`; to download through KaggleHub and process in one step, use `$env:PYTHONPATH='src'; .\.venv\Scripts\python.exe -m playstore_intelligence.pipeline --download`.
 
 Launch dashboard:
 
@@ -48,18 +50,21 @@ $env:PYTHONPATH = 'src'
 ```
 
 ## Dashboard
-Sections include Overview, Category Explorer, Competition Analysis, Opportunity Finder, App Explorer, and Methodology. Install bands are retained as source text and separately parsed as lower bounds. Opportunity ranks are heuristic category-level investigation prompts; configurable weights and alternative scenarios make ranking sensitivity visible.
+The five-step navigation is Market Overview → Explore Categories → Competition & Gaps → Opportunity Finder → Build Plan. Category filters update summaries, profiles, charts, and CSV exports. Opportunity weights update component contributions, scores, explanations, and ranks live; reset restores the documented defaults. Plans export as Markdown. Methodology and cleaning rules are available below the Overview metrics.
 
 ## Architecture
 `src/playstore_intelligence/` contains data discovery/loading, cleaning, descriptive analytics, scoring, recommendations, and pipeline modules. `app.py` is a thin Streamlit UI; tests use small synthetic fixtures and do not substitute for real-data validation.
 
 ## Method and limitations
-Read [docs/METHODOLOGY.md](docs/METHODOLOGY.md) and [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md). Ratings and installs are observational and do not establish causality. Category total installs are shown alongside median per-app install lower bounds. The score is not trained or commercially validated. Concepts require primary user research and demand validation.
+Read [docs/METHODOLOGY.md](docs/METHODOLOGY.md) and [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md). Ratings and installs are observational and do not establish causality. Category total installs are shown alongside median per-app install lower bounds. The score is not trained or commercially validated: active weights are normalized, missing empirical components use a visible neutral 0.50 fallback, feasibility is a fixed neutral engineering assumption, and evidence coverage reports the weighted availability of empirical features. Concepts require primary user research and demand validation.
 
 ## Verified snapshot findings
 The KaggleHub version 6 app CSV contains 10,841 source rows and 13 columns. The quality pipeline identified 483 exact duplicate rows, 1,979 rows with repeated app names (not necessarily duplicates), 1 column-shifted invalid-category record, 1,475 missing/invalid ratings, and one malformed install/date value each. It retained rows for audit and excluded exact duplicates plus the invalid-category record from category analysis, leaving 10,357 analysis-eligible rows across 33 categories. These are calculated findings from the downloaded snapshot, not current-market statistics.
 
 Under default heuristic weights, the leading categories are Education, Shopping, Weather, Photography, and Social. Alternative weight scenarios retain the same five but swap Social and Photography within the top five. Rankings only weakly stable at this close boundary; they are not app-success forecasts. The score uses category-relative features and neutral feasibility. See the quality JSON and test report for run-specific detail.
 
+## Deployment status
+Not deployed. No GitHub remote or verified repository URL is configured, and this workspace has uncommitted changes. Do not publish until the intended changes are reviewed and committed. For Streamlit Community Cloud after a verified GitHub push, create an app using the repository, branch `master`, entry point `app.py`, and root `requirements.txt`. Select a Python version supported by Community Cloud and verify the dependency build; CI is configured for Python 3.13 while local development uses 3.14.8. No app secrets are expected for the public Kaggle dataset. On a cold host, app startup attempts KaggleHub download and therefore needs outbound network access. If unavailable, configure `PLAYSTORE_DATA_DIR` to a permitted data source; do not commit the raw CSV until the dataset licence and redistribution terms are confirmed. Add repository/live URLs here only after verifying them.
+
 ## Verification state
-Actual dataset pipeline, tests, linting, and dashboard AppTest have been executed. This project does not claim deployment or public GitHub publication. See [docs/TEST_REPORT.md](docs/TEST_REPORT.md) for command-level results.
+Actual dataset pipeline, tests, linting, and dashboard AppTest have been executed. The current deployment fallback is covered by mocked unit tests, but hosted Kaggle access, GitHub Actions execution, and a live deployment are not verified. See [docs/TEST_REPORT.md](docs/TEST_REPORT.md) and [docs/RELEASE_AUDIT.md](docs/RELEASE_AUDIT.md) for command-level results and release blockers.

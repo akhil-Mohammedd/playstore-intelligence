@@ -1,4 +1,6 @@
+import sys
 from pathlib import Path
+from types import ModuleType
 
 import pandas as pd
 import pytest
@@ -6,7 +8,9 @@ import pytest
 from playstore_intelligence.analytics import category_summary
 from playstore_intelligence.cleaning import clean_apps, parse_installs, parse_size_mb
 from playstore_intelligence.data_loader import (
+    DATASET_ID,
     discover_csvs,
+    download_public_dataset,
     find_app_csv,
     load_app_data,
 )
@@ -96,6 +100,31 @@ def test_scoring_validates_weights_and_is_stable():
     with pytest.raises(ValueError):
         score_opportunities(summary, {"demand": -1})
     assert not sensitivity_analysis(summary).empty
+
+
+def test_public_dataset_download_uses_kagglehub_cache(tmp_path: Path, monkeypatch):
+    calls = []
+    kagglehub = ModuleType("kagglehub")
+    kagglehub.dataset_download = lambda dataset_id: (
+        calls.append(dataset_id) or str(tmp_path)
+    )
+    monkeypatch.setitem(sys.modules, "kagglehub", kagglehub)
+
+    assert download_public_dataset() == tmp_path
+    assert calls == [DATASET_ID]
+
+
+def test_public_dataset_download_reports_network_or_auth_failure(monkeypatch):
+    kagglehub = ModuleType("kagglehub")
+
+    def fail_download(_dataset_id):
+        raise OSError("offline")
+
+    kagglehub.dataset_download = fail_download
+    monkeypatch.setitem(sys.modules, "kagglehub", kagglehub)
+
+    with pytest.raises(RuntimeError, match="Check hosted outbound network access"):
+        download_public_dataset()
 
 
 def test_loader_missing_malformed_and_discovery(tmp_path: Path):
