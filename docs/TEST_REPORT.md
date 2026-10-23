@@ -13,6 +13,7 @@ Execution date: 2026-10-23 (UTC environment clock). All Python commands used `.v
 | Streamlit AppTest | `AppTest.from_file('app.py').run()` | Dashboard title and KPIs rendered; zero AppTest exceptions | Pass |
 | Streamlit HTTP smoke | Start `streamlit run app.py --server.headless true --server.port 8765`; GET `http://127.0.0.1:8765/_stcore/health` | HTTP 200, `ok`; local process terminated after check | Pass |
 | CI workflow parse | PyYAML `safe_load` of `.github/workflows/ci.yml` | YAML parsed and contains `test` job | Pass (syntax parse only) |
+| Editor type diagnostics | Zed language-server diagnostics after configuring `src` in `pyrightconfig.json` | Imports resolve; remaining diagnostics include unresolved Pandas/Plotly stubs and inferred DataFrame API types. No separate type-check command is configured | Not verified |
 | Git ignore/repository review | `git init`; `git check-ignore -v ...`; staged-path review; `git diff --cached --check` | `.venv`, the local `dataset/` directory, processed outputs, and caches are ignored; staged list contains 25 code/docs/config files only; whitespace check clean | Pass |
 | Credential-like literal scan | `git grep` over staged source | No matching credential-like literals found | Pass |
 | GitHub Actions run | Requires push/PR to GitHub | No remote configured and no workflow run available | Not verified |
