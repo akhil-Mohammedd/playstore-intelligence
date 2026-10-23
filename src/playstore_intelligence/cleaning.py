@@ -33,18 +33,25 @@ def parse_installs(value: Any) -> float:
 
 
 def parse_size_mb(value: Any) -> float:
-    """Convert MB or kB values to MB; variable/malformed sizes remain missing."""
+    """Convert common Play Store size units to MB; invalid sizes stay missing."""
     if pd.isna(value):
         return float("nan")
     text = str(value).strip()
-    match = re.fullmatch(r"([\d.]+)\s*(MB|GB|KB|B)", text, re.IGNORECASE)
+    match = re.fullmatch(
+        r"((?:\d+(?:\.\d*)?|\.\d+))\s*(GB|MB|KB|B|G|M|K)",
+        text,
+        re.IGNORECASE,
+    )
     if not match:
         return float("nan")
     amount, unit = float(match.group(1)), match.group(2).upper()
     return {
         "GB": amount * 1024,
+        "G": amount * 1024,
         "MB": amount,
+        "M": amount,
         "KB": amount / 1024,
+        "K": amount / 1024,
         "B": amount / (1024 * 1024),
     }[unit]
 

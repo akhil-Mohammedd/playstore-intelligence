@@ -57,6 +57,10 @@ def test_parsers():
     assert pd.isna(parse_installs("not known"))
     assert parse_size_mb("500kB") == pytest.approx(500 / 1024)
     assert parse_size_mb("1 GB") == 1024
+    assert parse_size_mb("19M") == 19
+    assert parse_size_mb("512k") == pytest.approx(512 / 1024)
+    assert parse_size_mb(".5 MB") == pytest.approx(0.5)
+    assert pd.isna(parse_size_mb("1..2 MB"))
     assert pd.isna(parse_size_mb("Varies with device"))
 
 
