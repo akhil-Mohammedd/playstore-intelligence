@@ -101,3 +101,23 @@ PowerShell activation is unnecessary; invoke venv executables directly. If Power
 - Product concepts are manually written hypotheses selected by ranked category, not algorithmically inferred solutions. Validate via interviews, competitor research, and prototype tests.
 - Dataset bundle `license.txt` says CC BY 3.0 Unported; this conflicts with the brief's CC BY-SA 4.0 assertion. Verify current Kaggle terms before redistribution.
 - Python 3.14.8 local checks passed. CI targets Python 3.13 and has not run on GitHub.
+
+## GitHub and deployment follow-up
+
+Checked again on 2026-10-23 for the GitHub release request:
+
+- Current branch is `master`; latest commits are `e0aa723 Correct release audit details`, `628a8ae Fix compact app size parsing`, and the earlier implementation commits. There is no configured Git remote.
+- `gh` (GitHub CLI) is not installed, so authenticated account/repository access cannot be inspected. No repository URL or owner has been invented. No push occurred.
+- The current Git working tree contains existing redesign edits plus deployment-readiness edits in `app.py`, `README.md`, `src/playstore_intelligence/data_loader.py`, and `tests/test_pipeline.py`. These are not yet committed. They were preserved and not pushed.
+- The app now checks an explicit data directory, `data/raw/`, and KaggleHub cache before attempting `kagglehub.dataset_download` for the public dataset. The KaggleHub call and actionable failure path have mocked unit tests. A fresh-host real outbound download has **not** been verified.
+- Raw CSV is approximately 1.36 MB locally and remains ignored by Git. The bundled `dataset/license.txt` states CC BY 3.0 Unported; the Kaggle page could not be textually verified, and the project brief's CC BY-SA 4.0 statement conflicts. The raw CSV was not added to Git.
+- Local result after the fallback change: 15 tests passed; Ruff lint and formatting passed; `pip check` passed; all five workspace-data AppTest pages rendered, and a changed demand weight changed scores. The existing server health/root URLs returned HTTP 200. These checks do not verify hosted network access or a public deployment.
+- GitHub Actions remains configured but has no hosted run; no Streamlit Community Cloud app or live URL is configured. Deployment status: **not deployed**.
+
+### Required next actions
+
+1. Review and commit the intended current redesign/deployment changes. The existing branch currently has uncommitted modifications; do not push until they are reviewed and committed.
+2. Install GitHub CLI and authenticate (`gh auth login`), or use an existing authorized Git transport. Then identify/create the intended repository and add its verified URL as `origin`; there is no repository identity available in this workspace to use safely.
+3. Push `master` without force, then verify the remote branch and Actions run.
+4. In Streamlit Community Cloud, create an app from the verified repository, select branch `master`, entry point `app.py`, and install from root `requirements.txt`. No secret is expected for the public dataset; outbound access to KaggleHub is required for an empty cache. If the host blocks it, configure `PLAYSTORE_DATA_DIR` to a permitted hosted file source rather than committing data before licence confirmation.
+5. Verify the resulting public URL, all pages, weight-driven ranking changes, and CSV/Markdown download interactions. Do not publish a URL in the README until those checks pass.
